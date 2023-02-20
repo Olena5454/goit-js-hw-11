@@ -9,7 +9,6 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const formSearch = document.getElementById('search-form');
 const btnLoadMore = document.querySelector('.load-more');
 const divGallery = document.querySelector('.gallery');
-// const lightbox = new SimpleLightbox('.gallery a');
 
 let pageCount = 0;
 let enteredValue = '';
