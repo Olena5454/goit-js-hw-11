@@ -9,10 +9,12 @@ import 'simplelightbox/dist/simple-lightbox.min.css';
 const formSearch = document.getElementById('search-form');
 const btnLoadMore = document.querySelector('.load-more');
 const divGallery = document.querySelector('.gallery');
+const lightbox = new SimpleLightbox('.gallery a');
 
 let pageCount = 0;
 let enteredValue = '';
 let listOfPhotos = '';
+let accForLoadMoreBtn = 0;
 
 formSearch.addEventListener('submit', onSearchSubmit);
 btnLoadMore.addEventListener('click', onLoadMoreSubmit);
@@ -20,7 +22,9 @@ btnLoadMore.addEventListener('click', onLoadMoreSubmit);
 removeLoadMoreBtn();
 
 async function onSearchSubmit(e) {
+  accForLoadMoreBtn = 0;
   e.preventDefault();
+  lightbox.refresh();
   clearListOfPhotos();
   enteredValue = e.currentTarget.searchQuery.value.trim();
   pageCount = 1;
@@ -29,6 +33,7 @@ async function onSearchSubmit(e) {
 }
 
 async function onLoadMoreSubmit(e) {
+  lightbox.refresh();
   removeLoadMoreBtn();
   e.preventDefault();
   pageCount += 1;
@@ -45,9 +50,7 @@ async function createRenderPhoto() {
       );
       const totalPhotos = await receivedObjectOfPhotos.data.total;
       const arrayOfPhotos = await receivedObjectOfPhotos.data.hits;
-
-      const checkForLoadMore = await requestPhotos(enteredValue, pageCount + 1);
-      const checkArrayOfPhotos = await checkForLoadMore.data.hits;
+      accForLoadMoreBtn += arrayOfPhotos.length;
 
       if (arrayOfPhotos.length > 0) {
         const {
@@ -66,11 +69,11 @@ async function createRenderPhoto() {
           (markup, photo) => createMarkupList(photo) + markup,
           ''
         );
-        if (checkArrayOfPhotos.length > 0) {
-          addLoadMoreBtn();
-        } else {
+        if (accForLoadMoreBtn === totalPhotos || pageCount === 13) {
           onTheEndOfListInfo();
           removeLoadMoreBtn();
+        } else {
+          addLoadMoreBtn();
         }
       } else {
         clearListOfPhotos();
@@ -93,11 +96,7 @@ function clearListOfPhotos() {
 
 function updateListOfPhotos(markup) {
   divGallery.insertAdjacentHTML('beforeend', markup);
-  new SimpleLightbox('.gallery a', {
-    captionsData: 'alt',
-    captionDelay: 250,
-    enableKeyboard: true,
-  }).refresh();
+  lightbox.refresh();
 }
 
 function createMarkupList({
